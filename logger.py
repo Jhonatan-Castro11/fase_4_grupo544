@@ -1,14 +1,10 @@
 """
-logger.py - Registro de eventos y errores en logs/eventos.log.
+logger.py - Registro de eventos y errores del sistema.
 Responsable: Persona 1
+
+Tareas:
+- Función registrar_evento(mensaje, nivel="INFO").
+- Función registrar_error(mensaje, excepcion=None).
+- Escribir en logs/eventos.log con fecha, nivel y mensaje.
+- Crear la carpeta logs si no existe y usar try/except/finally al abrir el archivo.
 """
-
-
-def registrar_evento(mensaje: str, nivel: str = "INFO") -> None:
-    """Escribe un evento en logs/eventos.log. TODO Persona 1."""
-    pass
-
-
-def registrar_error(mensaje: str, excepcion: Exception | None = None) -> None:
-    """Escribe un error (y su excepción) en logs/eventos.log. TODO Persona 1."""
-    pass
