@@ -1,6 +1,11 @@
 # TEMPORAL: borrar cuando Persona 1 suba excepciones.py y usar el import
 class ReservaInvalidaError(Exception):
     pass
+class OperacionNoPermitidaError(Exception):
+    pass
+
+class ServicioNoDisponibleError(Exception):
+    pass
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
     def __init__(self, id,cliente, servicio,duracion):
@@ -13,18 +18,46 @@ class Reserva:
         self.estado = "pendiente"  # Estado inicial de la reserva
         self.costo_total = 0.0  # Costo total de la reserva
 
+    def confirmar(self):
+        #Regla 1 regla de negocio: Solo se puede confirmar una reserva si está en estado "pendiente"
+        if self.estado != "pendiente":
+            raise OperacionNoPermitidaError(f"No se puede confirmar una reserva en estado {self.estado}")
+        #Regla 2 regla de negocio: Solo se puede confirmar una reserva si el servicio está disponible
+        if not self.servicio.disponible:
+            raise ServicioNoDisponibleError(f"El servicio {self.servicio} no está disponible")
+        self.estado = "confirmada" # Cambiar el estado a "confirmada"
+        self.servicio.disponible = False  # Marcar el servicio como no disponible
+
     def __str__(self):
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
 
 
 
 if __name__ == "__main__":
-    r = Reserva(1, "cliente_prueba", "servicio_prueba", 2)
-    print(r)
-    print(r.id, r.estado, r.costo_total)
+    class ServicioPrueba:
+        """Servicio falso solo para probar Reserva."""
+        def __init__(self, nombre):
+            self.nombre = nombre
+            self.disponible = True
+
+    sala = ServicioPrueba("Sala A")
+
+    r = Reserva(1, "cliente_prueba", sala, 2)
+    r.confirmar()
+    print("Estado:", r.estado, "| Sala disponible:", sala.disponible)
 
     try:
-        r2 = Reserva(2, "cliente_prueba", "servicio_prueba", 0)
-    except ReservaInvalidaError as e:
+        r.confirmar()                  # confirmar dos veces
+    except OperacionNoPermitidaError as e:
         print("Error capturado:", e)
 
+    try:
+        r2 = Reserva(2, "cliente_prueba", sala, 1)
+        r2.confirmar()                 # la sala ya está ocupada
+    except ServicioNoDisponibleError as e:
+        print("Error capturado:", e)
+
+    try:
+        r3 = Reserva(3, "cliente_prueba", sala, 0)   # duración inválida
+    except ReservaInvalidaError as e:
+        print("Error capturado:", e)
