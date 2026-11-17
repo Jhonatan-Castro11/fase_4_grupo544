@@ -28,6 +28,15 @@ class Reserva:
         self.estado = "confirmada" # Cambiar el estado a "confirmada"
         self.servicio.disponible = False  # Marcar el servicio como no disponible
 
+    def cancelar(self):
+        #Regla 3 regla de negocio: Solo se puede cancelar una reserva si está en estado "pendiente" o "confirmada"
+        if self.estado not in ["pendiente", "confirmada"]:
+            raise OperacionNoPermitidaError(f"No se puede cancelar una reserva en estado {self.estado}")
+        # Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
+        if self.estado == "confirmada":
+            self.servicio.disponible = True   # Libera el servicio para otras reservas
+        self.estado = "cancelada"             # Toda reserva cancelable pasa a "cancelada"
+
     def __str__(self):
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
 
@@ -61,3 +70,22 @@ if __name__ == "__main__":
         r3 = Reserva(3, "cliente_prueba", sala, 0)   # duración inválida
     except ReservaInvalidaError as e:
         print("Error capturado:", e)
+    
+    r.cancelar()                       # r estaba confirmada
+    print("Estado:", r.estado, "| Sala disponible:", sala.disponible)
+
+    try:
+        r.cancelar()                   # cancelar dos veces
+    except OperacionNoPermitidaError as e:
+        print("Error capturado:", e)
+
+    a = Reserva(4, "cliente_prueba", sala, 1)
+    a.confirmar()                      # A ocupa la sala
+    b = Reserva(5, "cliente_prueba", sala, 1)   # B queda pendiente
+    b.cancelar()                       # B nunca ocupó la sala
+    print("Sala disponible:", sala.disponible)  # debe ser False
+
+    sala_b = ServicioPrueba("Sala B")           # sala libre
+    c = Reserva(6, "cliente_prueba", sala_b, 1) # C queda pendiente
+    c.cancelar()                                # C nunca ocupó la sala
+    print("Sala B disponible:", sala_b.disponible)  # debe ser True
