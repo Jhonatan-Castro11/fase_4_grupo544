@@ -6,6 +6,9 @@ class OperacionNoPermitidaError(Exception):
 
 class ServicioNoDisponibleError(Exception):
     pass
+
+class CalculoInconsistenteError(Exception):
+    pass
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
     def __init__(self, id,cliente, servicio,duracion):
@@ -35,7 +38,23 @@ class Reserva:
         # Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
         if self.estado == "confirmada":
             self.servicio.disponible = True   # Libera el servicio para otras reservas
-        self.estado = "cancelada"             # Toda reserva cancelable pasa a "cancelada"
+        self.estado = "cancelada"  
+        
+    def procesar(self,impuesto=0.0, descuento=0.0):
+        if self.estado != "confirmada":
+            raise OperacionNoPermitidaError(f"No se puede procesar una reserva en estado {self.estado}") # Toda reserva cancelable pasa a "cancelada"
+        try:
+            #Polimorfismo: cada servicio calcula el costo de manera diferente
+            costo = self.servicio.calcular_costo(self.duracion, impuesto, descuento)
+        except CalculoInconsistenteError as error_calculo:
+            raise ReservaInvalidaError(f"No se pudo realizar la reserva{self.id}") from error_calculo
+        else:
+            self.costo_total = costo # Guardar el costo total de la reserva 
+            self.estado = "procesada"  # Cambiar el estado a "procesada"
+            self.servicio.disponible = True  # Liberar el servicio para otras reservas
+            return costo # Devolver el costo total de la reserva
+        finally:
+            print(f"Fin del procesamiento de la reseva {self.id}")
 
     def __str__(self):
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
@@ -49,7 +68,13 @@ if __name__ == "__main__":
             self.nombre = nombre
             self.disponible = True
 
+        def calcular_costo(self, duracion, impuesto=0.0, descuento=0.0):
+            if descuento > 1:
+                raise CalculoInconsistenteError("Descuento fuera de rango")
+            return 50000 * duracion * (1 + impuesto) * (1 - descuento)
+
     sala = ServicioPrueba("Sala A")
+    ...  # aquí siguen tus pruebas de antes, sin cambios
 
     r = Reserva(1, "cliente_prueba", sala, 2)
     r.confirmar()
@@ -89,3 +114,28 @@ if __name__ == "__main__":
     c = Reserva(6, "cliente_prueba", sala_b, 1) # C queda pendiente
     c.cancelar()                                # C nunca ocupó la sala
     print("Sala B disponible:", sala_b.disponible)  # debe ser True
+
+    sala_c = ServicioPrueba("Sala C")
+    p = Reserva(7, "cliente_prueba", sala_c, 2)
+    p.confirmar()
+    p.procesar(0.19, 0.10)             # 19 % de IVA y 10 % de descuento
+    print("Costo:", p.costo_total, "| Estado:", p.estado,
+          "| Sala C disponible:", sala_c.disponible)
+
+    try:
+        p.cancelar()                   # cancelar una reserva ya procesada
+    except OperacionNoPermitidaError as e:
+        print("Error capturado:", e)
+
+    try:
+        q = Reserva(8, "cliente_prueba", sala_c, 1)
+        q.confirmar()
+        q.procesar(0.19, 1.5)          # descuento del 150 %
+    except ReservaInvalidaError as e:
+        print("Error capturado:", e, "| Causa:", e.__cause__)
+
+    try:
+        Reserva(9, "cliente_prueba", sala_c, 1).procesar()   # sin confirmar
+    except OperacionNoPermitidaError as e:
+        print("Error capturado:", e)
+
