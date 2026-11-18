@@ -12,12 +12,13 @@ class CalculoInconsistenteError(Exception):
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
     def __init__(self, id,cliente, servicio,duracion):
-        if duracion <= 0:
+        if duracion <= 0: # Duración inválida
             raise ReservaInvalidaError(f"Duración inválida: {duracion}")
-        self.id = id
-        self.cliente = cliente
-        self.servicio = servicio
-        self.duracion = duracion
+        # Atributos de la reserva
+        self.id = id # Identificador único de la reserva
+        self.cliente = cliente # Cliente que realiza la reserva
+        self.servicio = servicio # Servicio que se reserva
+        self.duracion = duracion # Duración de la reserva en horas
         self.estado = "pendiente"  # Estado inicial de la reserva
         self.costo_total = 0.0  # Costo total de la reserva
 
@@ -27,7 +28,7 @@ class Reserva:
             raise OperacionNoPermitidaError(f"No se puede confirmar una reserva en estado {self.estado}")
         #Regla 2 regla de negocio: Solo se puede confirmar una reserva si el servicio está disponible
         if not self.servicio.disponible:
-            raise ServicioNoDisponibleError(f"El servicio {self.servicio} no está disponible")
+            raise ServicioNoDisponibleError(f"El servicio {self.servicio.nombre} no está disponible")
         self.estado = "confirmada" # Cambiar el estado a "confirmada"
         self.servicio.disponible = False  # Marcar el servicio como no disponible
 
@@ -41,20 +42,22 @@ class Reserva:
         self.estado = "cancelada"  
         
     def procesar(self,impuesto=0.0, descuento=0.0):
+        # Regla 5: solo se cobra una reserva confirmada
         if self.estado != "confirmada":
-            raise OperacionNoPermitidaError(f"No se puede procesar una reserva en estado {self.estado}") # Toda reserva cancelable pasa a "cancelada"
+            raise OperacionNoPermitidaError(f"No se puede procesar una reserva en estado {self.estado}") 
         try:
             #Polimorfismo: cada servicio calcula el costo de manera diferente
             costo = self.servicio.calcular_costo(self.duracion, impuesto, descuento)
         except CalculoInconsistenteError as error_calculo:
-            raise ReservaInvalidaError(f"No se pudo realizar la reserva{self.id}") from error_calculo
+            raise ReservaInvalidaError(f"No se pudo realizar la reserva {self.id}") from error_calculo
         else:
             self.costo_total = costo # Guardar el costo total de la reserva 
             self.estado = "procesada"  # Cambiar el estado a "procesada"
             self.servicio.disponible = True  # Liberar el servicio para otras reservas
             return costo # Devolver el costo total de la reserva
         finally:
-            print(f"Fin del procesamiento de la reseva {self.id}")
+            #finally se ejecuta siempre, haya o no error
+            print(f"Fin del procesamiento de la reserva {self.id}") 
 
     def __str__(self):
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
@@ -74,7 +77,6 @@ if __name__ == "__main__":
             return 50000 * duracion * (1 + impuesto) * (1 - descuento)
 
     sala = ServicioPrueba("Sala A")
-    ...  # aquí siguen tus pruebas de antes, sin cambios
 
     r = Reserva(1, "cliente_prueba", sala, 2)
     r.confirmar()
