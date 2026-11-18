@@ -21,6 +21,6 @@ python main.py
 
 ## Integrantes
 
-- Persona 1:
+- Persona 1: Jhonatan Castro
 - Persona 2:
 - Persona 3: Carlos
