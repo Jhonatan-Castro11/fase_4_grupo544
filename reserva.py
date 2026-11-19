@@ -1,20 +1,10 @@
 """
-DOCSTRING:
 reserva.py - Clase Reserva: integra cliente, servicio, duración y estado.
 Responsable: Persona 3 (Carlos)
 """
+# Excepciones personalizadas del sistema (excepciones.py)
+from excepciones import ReservaInvalidaError, OperacionNoPermitidaError, ServicioNoDisponibleError, CalculoInconsistenteError
 
-# TEMPORAL: borrar cuando Persona 1 suba excepciones.py y usar el import
-class ReservaInvalidaError(Exception):
-    pass
-class OperacionNoPermitidaError(Exception):
-    pass
-
-class ServicioNoDisponibleError(Exception):
-    pass
-
-class CalculoInconsistenteError(Exception):
-    pass
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
     def __init__(self, id,cliente, servicio,duracion):
