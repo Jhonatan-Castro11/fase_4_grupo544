@@ -1,3 +1,9 @@
+"""
+DOCSTRING:
+reserva.py - Clase Reserva: integra cliente, servicio, duración y estado.
+Responsable: Persona 3 (Carlos)
+"""
+
 # TEMPORAL: borrar cuando Persona 1 suba excepciones.py y usar el import
 class ReservaInvalidaError(Exception):
     pass
@@ -34,7 +40,7 @@ class Reserva:
 
     def cancelar(self):
         #Regla 3 regla de negocio: Solo se puede cancelar una reserva si está en estado "pendiente" o "confirmada"
-        if self.estado not in ["pendiente", "confirmada"]:
+        if self.estado not in ["pendiente", "confirmada"]: # 
             raise OperacionNoPermitidaError(f"No se puede cancelar una reserva en estado {self.estado}")
         # Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
         if self.estado == "confirmada":
