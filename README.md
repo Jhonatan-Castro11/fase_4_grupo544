@@ -22,5 +22,5 @@ python main.py
 ## Integrantes
 
 - Persona 1: Jhonatan Castro
-- Persona 2:
-- Persona 3: Carlos
+- Persona 2: Camilo Guerrero y Jhorman González
+- Persona 3: Carlos Diaz
