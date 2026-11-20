@@ -105,6 +105,11 @@ def op_servicio_ocupado():
     segunda = Reserva(4, clientes[0], servicios[0], 1)   #Segunda reserva de la misma sala
     segunda.confirmar()                                  #Pasa a confirmar la misma sala ya ocupada
 
+def op_cancelar_procesada():
+    """Intenta cancelar una reserva que ya fue procesada."""
+    reserva = reservas[0] # La reserva 1, que se procesó en la operación 7
+    reserva.cancelar()    # Intenta cancelarla: debe fallar porque ya está procesada
+
 def main():
     """Ejecuta la simulación completa."""
     ejecutar_operacion(1, "Registro de cliente válido", op_cliente_valido) #Muestra una operación que funciona correctamente
@@ -116,6 +121,7 @@ def main():
     ejecutar_operacion(7, "Reserva exitosa de Sala A", op_reserva_exitosa) #Muestra una operación que funciona correctamente
     ejecutar_operacion(8, "Reserva con duración cero", op_reserva_duracion_cero) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(9, "Reserva de servicio ocupado", op_servicio_ocupado) #Muestra una operación que falla y captura el error sin detener el programa
+    ejecutar_operacion(10,"Cancelar una reserva ya procesada", op_cancelar_procesada)  #Muestra una operacion de intento de cancelacion de una reserva ya procesada
     print(f"Reservas registradas: {len(reservas)}")  # Solo deben quedar las reservas válidas
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
     print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
