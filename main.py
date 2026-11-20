@@ -31,7 +31,9 @@ def ejecutar_operacion(numero, descripcion, funcion):
     try:
         funcion()                             # Ejecuta la función que representa la operación recibida como argumento
     except SoftwareFJError as e:
-        print(f"ERROR controlado: {e}")       # Muestra el error sin detener el programa
+        print(f"ERROR controlado: {e}")
+        if e.__cause__:                               # Si el error trae otro encadenado...
+            print(f"  Causa original: {e.__cause__}")  # ...también muestra el error original
         resumen["fallidas"] += 1              # Registra la operación fallida en el resumen
 
     except Exception as e:
@@ -96,7 +98,6 @@ def op_reserva_duracion_cero():
     reserva = Reserva(2, clientes[0], servicios[0],0)    #Se intenta hacer una reserva con duracionde 0 horas
     reservas.append(reserva)                             #Nunca llega aqui si la duracion es invalida
     
-
 def op_servicio_ocupado():
     """Intenta crear una reserva de un servicio que ya está ocupado."""
     primera = Reserva(3, clientes[0], servicios[0], 1)   # Primera reserva de la Sala A
@@ -110,6 +111,12 @@ def op_cancelar_procesada():
     reserva = reservas[0] # La reserva 1, que se procesó en la operación 7
     reserva.cancelar()    # Intenta cancelarla: debe fallar porque ya está procesada
 
+def op_descuento_invalido():
+    """"Intenta procesar una reserva con un descuento inválido (mayor al 100%)."""
+    reserva = Reserva(5, clientes[0], servicios[1], 2)   # Ana alquila el proyector por 2 días
+    reserva.confirmar()                                  # Pasa a confirmada y ocupa la sala
+    reserva.procesar(0.19, 1.5)                          # Descuento del 150 %: debe fallar
+
 def main():
     """Ejecuta la simulación completa."""
     ejecutar_operacion(1, "Registro de cliente válido", op_cliente_valido) #Muestra una operación que funciona correctamente
@@ -122,6 +129,7 @@ def main():
     ejecutar_operacion(8, "Reserva con duración cero", op_reserva_duracion_cero) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(9, "Reserva de servicio ocupado", op_servicio_ocupado) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(10,"Cancelar una reserva ya procesada", op_cancelar_procesada)  #Muestra una operacion de intento de cancelacion de una reserva ya procesada
+    ejecutar_operacion(11, "Procesar reserva con descuento mayor al 100 %", op_descuento_invalido)
     print(f"Reservas registradas: {len(reservas)}")  # Solo deben quedar las reservas válidas
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
     print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
