@@ -44,19 +44,19 @@ def ejecutar_operacion(numero, descripcion, funcion):
 
 def op_cliente_valido():
     """Registra un cliente con todos sus datos correctos."""
-    cliente = Cliente("Ana Pérez", "1010", "ana@correo.com", "3001234567")  # Crea el cliente (valida sus datos)
+    cliente = Cliente(1, "Ana Pérez", "1010", "ana@correo.com", "3001234567")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())
     
 def op_correo_invalido():
     """Intenta registrar un cliente con un correo inválido."""
-    cliente = Cliente("Luis García", "1011", "luis@correo", "3001234568")  # Crea el cliente (valida sus datos)
+    cliente = Cliente(2, "Luis García", "1011", "luis@correo", "3001234568")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())                                                 # Muestra sus datos
 
 def op_cliente_sin_documento():
     """Intenta registrar un cliente sin número de documento."""
-    cliente = Cliente("María López", "", "maria@correo.com", "3001234569")  # Crea el cliente (valida sus datos)
+    cliente = Cliente(3, "María López", "", "maria@correo.com", "3001234569")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())                                                  # Muestra sus datos
 
