@@ -117,6 +117,16 @@ def op_descuento_invalido():
     reserva.confirmar()                                  # Pasa a confirmada y ocupa la sala
     reserva.procesar(0.19, 1.5)                          # Descuento del 150 %: debe fallar
 
+def op_variantes_costo():
+    """Muestra diferentes variantes de cálculo de costo para una asesoría."""
+    asesoria = servicios[2]                             # La asesoría
+    sin_extras = asesoria.calcular_costo(2)             # Solo duración
+    con_iva = asesoria.calcular_costo(2, 0.19)          # Duración + IVA
+    completo = asesoria.calcular_costo(2, 0.19, 0.10)   # Duración + IVA + descuento
+    print(f"Solo duración:       ${sin_extras:,.2f}")
+    print(f"Con IVA:             ${con_iva:,.2f}")
+    print(f"Con IVA y descuento: ${completo:,.2f}")
+
 def main():
     """Ejecuta la simulación completa."""
     ejecutar_operacion(1, "Registro de cliente válido", op_cliente_valido) #Muestra una operación que funciona correctamente
@@ -130,6 +140,7 @@ def main():
     ejecutar_operacion(9, "Reserva de servicio ocupado", op_servicio_ocupado) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(10,"Cancelar una reserva ya procesada", op_cancelar_procesada)  #Muestra una operacion de intento de cancelacion de una reserva ya procesada
     ejecutar_operacion(11, "Procesar reserva con descuento mayor al 100 %", op_descuento_invalido)
+    ejecutar_operacion(12, "Variantes de cálculo de costo para una asesoría", op_variantes_costo)
     print(f"Reservas registradas: {len(reservas)}")  # Solo deben quedar las reservas válidas
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
     print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
