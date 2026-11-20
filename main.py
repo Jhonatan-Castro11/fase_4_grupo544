@@ -72,6 +72,14 @@ def op_servicio_precio_negativo():
     servicios.append(sala)                   # La guarda en la lista
     print(sala.describir())                  # Muestra sus datos
 
+def op_crear_equipo_y_asesoria():
+    """Crea un servicio de alquiler de equipo y asesoría con datos correctos."""
+    equipo = AlquilerEquipo("Proyector", 20000, tipo_equipo="Audiovisual")  # Crea el equipo (valida sus datos)
+    asesoria = Asesoria("Asesoría de marketing", 150000, especialidad="Marketing", recargo=0.1)  # Crea la asesoría (valida sus datos)
+    servicios.append(equipo)               # Guarda el equipo en la lista
+    servicios.append(asesoria)             # Guarda la asesoría en la lista
+    print(equipo.describir())              # Polimorfismo: el mismo método describir()
+    print(asesoria.describir())            # da una respuesta diferente según el tipo de servicio
 
 def main():
     """Ejecuta la simulación completa."""
@@ -80,6 +88,7 @@ def main():
     ejecutar_operacion(3, "Registro de cliente sin documento", op_cliente_sin_documento) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(4, "Creación de sala con precio válido", op_crear_sala) #Muestra una operación que funciona correctamente
     ejecutar_operacion(5, "Creación de sala con precio negativo", op_servicio_precio_negativo) #Muestra una operación que falla y captura el error sin detener el programa
+    ejecutar_operacion(6, "Creación de alquiler de equipo y asesoría", op_crear_equipo_y_asesoria)
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
     print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
     print(f"Resumen: {resumen['exitosas']} exitosas, {resumen['fallidas']} fallidas")
