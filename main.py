@@ -11,6 +11,8 @@ Tareas:
 from excepciones import SoftwareFJError
 # Clase Cliente del sistema (entidades.py)
 from entidades import Cliente
+# Clase ReservaSala, AlquilerEquipo y Asesoria del sistema (servicios.py)
+from servicios import ReservaSala, AlquilerEquipo, Asesoria
 
 # Listas internas: reemplazan a la base de datos
 clientes = []
@@ -29,6 +31,10 @@ def ejecutar_operacion(numero, descripcion, funcion):
     except SoftwareFJError as e:
         print(f"ERROR controlado: {e}")       # Muestra el error sin detener el programa
         resumen["fallidas"] += 1              # Registra la operación fallida en el resumen
+
+    except Exception as e:
+        print(f"ERROR inesperado: {e}")       # Muestra errores de programación sin detener el programa
+        resumen["fallidas"] += 1              # Cuenta la operación como fallida
     else:
         print("Operación exitosa")            # Si no hay errores, muestra un mensaje de éxito
         resumen["exitosas"] += 1              # Registra la operación exitosa en el resumen
@@ -38,29 +44,44 @@ def ejecutar_operacion(numero, descripcion, funcion):
 
 def op_cliente_valido():
     """Registra un cliente con todos sus datos correctos."""
-    cliente = Cliente(1, "Ana Pérez", "1010", "ana@correo.com", "3001234567")  # Crea el cliente (valida sus datos)
+    cliente = Cliente("Ana Pérez", "1010", "ana@correo.com", "3001234567")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())
     
 def op_correo_invalido():
     """Intenta registrar un cliente con un correo inválido."""
-    cliente = Cliente(2, "Luis García", "1011", "luis@correo", "3001234568")  # Crea el cliente (valida sus datos)
+    cliente = Cliente("Luis García", "1011", "luis@correo", "3001234568")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())                                                 # Muestra sus datos
 
 def op_cliente_sin_documento():
     """Intenta registrar un cliente sin número de documento."""
-    cliente = Cliente(3, "María López", "", "maria@correo.com", "3001234569")  # Crea el cliente (valida sus datos)
+    cliente = Cliente("María López", "", "maria@correo.com", "3001234569")  # Crea el cliente (valida sus datos)
     clientes.append(cliente)                                                    # Lo guarda en la lista
     print(cliente.describir())                                                  # Muestra sus datos
+
+def op_crear_sala():
+    """Crea un servicio de reserva de sala con datos correctos."""
+    sala = ReservaSala("Sala A", 50000)  # Crea la sala (valida sus datos)
+    servicios.append(sala)               # La guarda en la lista
+    print(sala.describir())              # Muestra sus datos
+
+def op_servicio_precio_negativo():
+    """Intenta crear un servicio con precio negativo."""
+    sala = ReservaSala("Sala B", -5000)  # Crea la sala (valida sus datos)
+    servicios.append(sala)                   # La guarda en la lista
+    print(sala.describir())                  # Muestra sus datos
+
 
 def main():
     """Ejecuta la simulación completa."""
     ejecutar_operacion(1, "Registro de cliente válido", op_cliente_valido) #Muestra una operación que funciona correctamente
     ejecutar_operacion(2, "Registro de cliente con correo inválido", op_correo_invalido) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(3, "Registro de cliente sin documento", op_cliente_sin_documento) #Muestra una operación que falla y captura el error sin detener el programa
-    # Aquí se pueden agregar más operaciones de prueba, tanto exitosas como fallidas
+    ejecutar_operacion(4, "Creación de sala con precio válido", op_crear_sala) #Muestra una operación que funciona correctamente
+    ejecutar_operacion(5, "Creación de sala con precio negativo", op_servicio_precio_negativo) #Muestra una operación que falla y captura el error sin detener el programa
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
+    print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
     print(f"Resumen: {resumen['exitosas']} exitosas, {resumen['fallidas']} fallidas")
     print("El programa terminó sin detenerse") # Muestra un mensaje al finalizar el programa
 
