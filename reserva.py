@@ -34,11 +34,11 @@ class Reserva:
         #Regla 3 regla de negocio: Solo se puede cancelar una reserva si está en estado "pendiente" o "confirmada"
         if self.estado not in ["pendiente", "confirmada"]: # 
             raise OperacionNoPermitidaError(f"No se puede cancelar una reserva en estado {self.estado}")
-        # Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
+        #Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
         if self.estado == "confirmada":
-            self.servicio.disponible = True   # Libera el servicio para otras reservas
-        self.estado = "cancelada"  
-        registrar_evento(f"Reserva {self.id} Cancelada")
+            self.servicio.disponible = True   #Libera el servicio para otras reservas
+        self.estado = "cancelada"  #Muestra que la reserva ha sido cancelada
+        registrar_evento(f"Reserva {self.id} cancelada") #registra el evento en el log
 
     def procesar(self,impuesto=0.0, descuento=0.0):
         # Regla 5: solo se cobra una reserva confirmada
@@ -48,14 +48,17 @@ class Reserva:
             #Polimorfismo: cada servicio calcula el costo de manera diferente
             costo = self.servicio.calcular_costo(self.duracion, impuesto, descuento)
         except CalculoInconsistenteError as error_calculo:
+            #Registra el error en el log y lanza una excepción personalizada
             registrar_error(f"Error al procesar la reserva {self.id}: {error_calculo}")  # Registra el error en el log
             raise ReservaInvalidaError(f"No se pudo realizar la reserva {self.id}") from error_calculo
         else:
+            #
             registrar_evento(f"Reserva {self.id} procesada, costo: ${costo:,.2f}")  # Registra el evento en el log
             self.costo_total = costo # Guardar el costo total de la reserva 
             self.estado = "procesada"  # Cambiar el estado a "procesada"
             self.servicio.disponible = True  # Liberar el servicio para otras reservas
             return costo # Devolver el costo total de la reserva
+        #Finally: se ejecuta siempre, haya o no error, para registrar el fin del procesamiento de la reserva
         finally:
             registrar_evento(f"Fin del procesamiento de la reserva: {self.id}") #Finaliza el procesamiento de la reserva
 
