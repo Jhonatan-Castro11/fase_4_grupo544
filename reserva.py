@@ -6,20 +6,28 @@ Responsable: Persona 3 (Carlos)
 from excepciones import ReservaInvalidaError, OperacionNoPermitidaError, ServicioNoDisponibleError, CalculoInconsistenteError
 # Funciones de registro en logs/eventos.log (logger.py)
 from logger import registrar_evento, registrar_error
+
+
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
-    def __init__(self, id,cliente, servicio,duracion):
+    def __init__(self, id, cliente, servicio, duracion):
         if duracion <= 0: # Duración inválida
             raise ReservaInvalidaError(f"Duración inválida: {duracion}")
         # Atributos de la reserva
         self.id = id # Identificador único de la reserva
         self.cliente = cliente # Cliente que realiza la reserva
         self.servicio = servicio # Servicio que se reserva
-        self.duracion = duracion # Duración de la reserva en horas
+        self.duracion = duracion # Duración (horas o días, según el servicio)
         self.estado = "pendiente"  # Estado inicial de la reserva
         self.costo_total = 0.0  # Costo total de la reserva
 
+
     def confirmar(self):
+        """
+        Confirma la reserva y ocupa el servicio.
+        Lanza OperacionNoPermitidaError si la reserva no está pendiente.
+        Lanza ServicioNoDisponibleError si el servicio ya está ocupado.
+        """    
         #Regla 1 regla de negocio: Solo se puede confirmar una reserva si está en estado "pendiente"
         if self.estado != "pendiente":
             raise OperacionNoPermitidaError(f"No se puede confirmar una reserva en estado {self.estado}")
@@ -28,11 +36,17 @@ class Reserva:
             raise ServicioNoDisponibleError(f"El servicio {self.servicio.nombre} no está disponible")
         self.estado = "confirmada" # Cambiar el estado a "confirmada"
         self.servicio.disponible = False  # Marcar el servicio como no disponible
-        registrar_evento(f"Reserva {self.id} confirmada")
+        registrar_evento(f"Reserva {self.id} confirmada") #Registra el evento en el log
 
+   
     def cancelar(self):
+        """Cancela la reserva y libera el servicio si estaba ocupado.
+        cancelar() solo puede ejecutarse si la reserva está pendiente o confirmada.
+        libera el servicio solo si la reserva estaba confirmada.
+        Lanza OperacionNoPermitidaError si la reserva no está pendiente o confirmada."""        
+
         #Regla 3 regla de negocio: Solo se puede cancelar una reserva si está en estado "pendiente" o "confirmada"
-        if self.estado not in ["pendiente", "confirmada"]: # 
+        if self.estado not in ["pendiente", "confirmada"]:  
             raise OperacionNoPermitidaError(f"No se puede cancelar una reserva en estado {self.estado}")
         #Regla 4: solo libera el servicio la reserva que lo había ocupado (la confirmada)
         if self.estado == "confirmada":
@@ -40,8 +54,12 @@ class Reserva:
         self.estado = "cancelada"  #Muestra que la reserva ha sido cancelada
         registrar_evento(f"Reserva {self.id} cancelada") #registra el evento en el log
 
-    def procesar(self,impuesto=0.0, descuento=0.0):
-        # Regla 5: solo se cobra una reserva confirmada
+    def procesar(self, impuesto=0.0, descuento=0.0):
+        """Procesa la reserva y calcula el costo total.
+            Solo puede procesarse una reserva confirmada.
+            Lanza OperacionNoPermitidaError si la reserva no está confirmada.
+            Lanza ReservaInvalidaError si el cálculo del costo falla (por ejemplo, descuento inválido)."""
+        #Regla 5: solo se cobra una reserva confirmada
         if self.estado != "confirmada":
             raise OperacionNoPermitidaError(f"No se puede procesar una reserva en estado {self.estado}") 
         try:
@@ -52,18 +70,17 @@ class Reserva:
             registrar_error(f"Error al procesar la reserva {self.id}: {error_calculo}")  # Registra el error en el log
             raise ReservaInvalidaError(f"No se pudo realizar la reserva {self.id}") from error_calculo
         else:
-            #
+            #Registra el evento en el log y actualiza el estado de la reserva
             registrar_evento(f"Reserva {self.id} procesada, costo: ${costo:,.2f}")  # Registra el evento en el log
             self.costo_total = costo # Guardar el costo total de la reserva 
             self.estado = "procesada"  # Cambiar el estado a "procesada"
             self.servicio.disponible = True  # Liberar el servicio para otras reservas
             return costo # Devolver el costo total de la reserva
-        #Finally: se ejecuta siempre, haya o no error, para registrar el fin del procesamiento de la reserva
-        finally:
+        finally: #Finally: se ejecuta siempre, haya o no error, para registrar el fin del procesamiento de la reserva
             registrar_evento(f"Fin del procesamiento de la reserva: {self.id}") #Finaliza el procesamiento de la reserva
 
-    #Str 
     def __str__(self):
+        """Devuelve una representación legible de la reserva, con su estado y costo total."""
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
 
 
