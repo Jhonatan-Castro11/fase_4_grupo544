@@ -4,7 +4,8 @@ Responsable: Persona 3 (Carlos)
 """
 # Excepciones personalizadas del sistema (excepciones.py)
 from excepciones import ReservaInvalidaError, OperacionNoPermitidaError, ServicioNoDisponibleError, CalculoInconsistenteError
-
+# Funciones de registro en logs/eventos.log (logger.py)
+from logger import registrar_evento, registrar_error
 class Reserva:
     """Clase que representa una reserva de un servicio por parte de un cliente."""
     def __init__(self, id,cliente, servicio,duracion):
@@ -27,6 +28,7 @@ class Reserva:
             raise ServicioNoDisponibleError(f"El servicio {self.servicio.nombre} no está disponible")
         self.estado = "confirmada" # Cambiar el estado a "confirmada"
         self.servicio.disponible = False  # Marcar el servicio como no disponible
+        registrar_evento(f"Reserva {self.id} confirmada")
 
     def cancelar(self):
         #Regla 3 regla de negocio: Solo se puede cancelar una reserva si está en estado "pendiente" o "confirmada"
@@ -36,7 +38,8 @@ class Reserva:
         if self.estado == "confirmada":
             self.servicio.disponible = True   # Libera el servicio para otras reservas
         self.estado = "cancelada"  
-        
+        registrar_evento(f"Reserva {self.id} Cancelada")
+
     def procesar(self,impuesto=0.0, descuento=0.0):
         # Regla 5: solo se cobra una reserva confirmada
         if self.estado != "confirmada":
@@ -45,16 +48,18 @@ class Reserva:
             #Polimorfismo: cada servicio calcula el costo de manera diferente
             costo = self.servicio.calcular_costo(self.duracion, impuesto, descuento)
         except CalculoInconsistenteError as error_calculo:
+            registrar_error(f"Error al procesar la reserva {self.id}: {error_calculo}")  # Registra el error en el log
             raise ReservaInvalidaError(f"No se pudo realizar la reserva {self.id}") from error_calculo
         else:
+            registrar_evento(f"Reserva {self.id} procesada, costo: ${costo:,.2f}")  # Registra el evento en el log
             self.costo_total = costo # Guardar el costo total de la reserva 
             self.estado = "procesada"  # Cambiar el estado a "procesada"
             self.servicio.disponible = True  # Liberar el servicio para otras reservas
             return costo # Devolver el costo total de la reserva
         finally:
-            #finally se ejecuta siempre, haya o no error
-            print(f"Fin del procesamiento de la reserva {self.id}") 
+            registrar_evento(f"Fin del procesamiento de la reserva: {self.id}") #Finaliza el procesamiento de la reserva
 
+    #Str 
     def __str__(self):
         return f"Reserva(id={self.id}, cliente={self.cliente}, servicio={self.servicio}, duracion={self.duracion}, estado={self.estado}, costo_total={self.costo_total})"
 
