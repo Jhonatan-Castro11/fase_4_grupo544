@@ -13,6 +13,8 @@ from excepciones import SoftwareFJError
 from entidades import Cliente
 # Clase ReservaSala, AlquilerEquipo y Asesoria del sistema (servicios.py)
 from servicios import ReservaSala, AlquilerEquipo, Asesoria
+# Clase Reserva del sistema (reserva.py)
+from reserva import Reserva
 
 # Listas internas: reemplazan a la base de datos
 clientes = []
@@ -81,6 +83,28 @@ def op_crear_equipo_y_asesoria():
     print(equipo.describir())              # Polimorfismo: el mismo método describir()
     print(asesoria.describir())            # da una respuesta diferente según el tipo de servicio
 
+def op_reserva_exitosa():
+    """Crea, confirma y procesa una reserva válida de la Sala A."""
+    reserva = Reserva(1, clientes[0], servicios[0], 2)   # Ana reserva la Sala A por 2 horas
+    reserva.confirmar()                                  # Pasa a confirmada y ocupa la sala
+    costo = reserva.procesar(0.19, 0.10)                 # Cobra con 19 % de IVA y 10 % de descuento
+    reservas.append(reserva)                             # La guarda en la lista
+    print(f"Reserva {reserva.id} procesada. Costo: ${costo:,.2f}")  # Muestra el resultado
+
+def op_reserva_duracion_cero():
+    """Intenta crear una reserva con duración cero."""
+    reserva = Reserva(2, clientes[0], servicios[0],0)    #Se intenta hacer una reserva con duracionde 0 horas
+    reservas.append(reserva)                             #Nunca llega aqui si la duracion es invalida
+    
+
+def op_servicio_ocupado():
+    """Intenta crear una reserva de un servicio que ya está ocupado."""
+    primera = Reserva(3, clientes[0], servicios[0], 1)   # Primera reserva de la Sala A
+    primera.confirmar()                                  # Pasa a confirmada y ocupa la sala
+    reservas.append(primera)                             # La guarda en la lista
+    segunda = Reserva(4, clientes[0], servicios[0], 1)   #Segunda reserva de la misma sala
+    segunda.confirmar()                                  #Pasa a confirmar la misma sala ya ocupada
+
 def main():
     """Ejecuta la simulación completa."""
     ejecutar_operacion(1, "Registro de cliente válido", op_cliente_valido) #Muestra una operación que funciona correctamente
@@ -88,7 +112,11 @@ def main():
     ejecutar_operacion(3, "Registro de cliente sin documento", op_cliente_sin_documento) #Muestra una operación que falla y captura el error sin detener el programa
     ejecutar_operacion(4, "Creación de sala con precio válido", op_crear_sala) #Muestra una operación que funciona correctamente
     ejecutar_operacion(5, "Creación de sala con precio negativo", op_servicio_precio_negativo) #Muestra una operación que falla y captura el error sin detener el programa
-    ejecutar_operacion(6, "Creación de alquiler de equipo y asesoría", op_crear_equipo_y_asesoria)
+    ejecutar_operacion(6, "Creación de alquiler de equipo y asesoría", op_crear_equipo_y_asesoria) #Muestra una operación que funciona correctamente
+    ejecutar_operacion(7, "Reserva exitosa de Sala A", op_reserva_exitosa) #Muestra una operación que funciona correctamente
+    ejecutar_operacion(8, "Reserva con duración cero", op_reserva_duracion_cero) #Muestra una operación que falla y captura el error sin detener el programa
+    ejecutar_operacion(9, "Reserva de servicio ocupado", op_servicio_ocupado) #Muestra una operación que falla y captura el error sin detener el programa
+    print(f"Reservas registradas: {len(reservas)}")  # Solo deben quedar las reservas válidas
     print(f"Clientes registrados: {len(clientes)}")  # Solo deben quedar los clientes válidos
     print(f"Servicios registrados: {len(servicios)}")  # Solo deben quedar los servicios válidos
     print(f"Resumen: {resumen['exitosas']} exitosas, {resumen['fallidas']} fallidas")
